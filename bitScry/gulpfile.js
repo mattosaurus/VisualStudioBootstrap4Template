@@ -10,7 +10,6 @@ var concat = require('gulp-concat');
 var rimraf = require("rimraf");
 var merge = require('merge-stream');
 var csso = require('gulp-csso');
-var runSequence = require('run-sequence');
 
 gulp.task("minify-js", function () {
 
@@ -29,10 +28,10 @@ gulp.task("minify-css", function () {
     return gulp.src('wwwroot/css/site.css')
         .pipe(csso())
         .pipe(concat("site.min.css"))
-        .pipe(gulp.dest('wwwroot/lib/site/css'))
+        .pipe(gulp.dest('wwwroot/lib/site/css'));
 });
 
-gulp.task("minify", ['minify-js', 'minify-css']);
+gulp.task("minify", gulp.parallel('minify-js', 'minify-css'));
 
 // Dependency Dirs
 var deps = {
@@ -55,7 +54,7 @@ gulp.task("clean-site", function (cb) {
     return rimraf("wwwroot/lib/site/", cb);
 });
 
-gulp.task("clean", ['clean-vendor', 'clean-site']);
+gulp.task("clean", gulp.parallel('clean-vendor', 'clean-site'));
 
 gulp.task("scripts", function () {
 
@@ -73,10 +72,6 @@ gulp.task("scripts", function () {
 
 });
 
-gulp.task('default', function (callback) {
-    runSequence('clean',
-        ['minify', 'scripts']
-    );
-});
-
-//gulp.task("default", ['clean', 'minify', 'scripts']);
+gulp.task('default',
+    gulp.series('clean', gulp.parallel('minify', 'scripts'))
+);
